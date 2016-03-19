@@ -15,23 +15,35 @@
 # version 3 and any later version.                  #
 #####################################################
 
-version="2016-02-12"
+version="2016-03-19"
 
 set -e
 
 script="$1"
 zip="$2"
+log="$3"
 
 td="/tmp/lanchon-flashize"
 
-fatal() {
+error() {
     >&2 echo "$@"
+}
+
+fatal() {
+    error "$@"
     exit 1
 }
 
 if [ -z "$script" ]; then
-    >&2 echo "Flashize ($version)"
-    fatal "Usage: <input-script> [<output-zip>]"
+    error "Flashize ($version)"
+    error "Usage: <input-script> [<output-zip> [<runtime-logfile>]]"
+    error
+    error "use <runtime-logfile> to create a logfile on the device during script execution"
+    error "the value of the <runtime-logfile> parameter can be:"
+    error "  -the absolute path of the logfile to be created or appended"
+    error "  -a relative path or filename interpreted against the path of the zipfile being run"
+    error "  -the character '-' to use the pathname of the zipfile being run with a '.log' extension"
+    fatal "  -the empty string to disable logging"
 fi
 
 if [ ! -f "$script" ]; then
@@ -70,10 +82,32 @@ cat >"$ubin" <<EOF
 EOF
 cat >>"$ubin" <<"EOF"
 if [ "$1" != "lanchon-magic" ]; then
+EOF
+cat >>"$ubin" <<EOF
+    log="$log"
+EOF
+cat >>"$ubin" <<"EOF"
     out="/proc/self/fd/$2"
     zip="$3"
+    if [ -n "$log" ]; then
+        if [ "${log::1}" != "/" ]; then
+            logzip="$zip"
+            if [ "$logzip" == "/tmp/update.zip" ] || [ "$logzip" == "/sideload/package.zip" ]; then
+                # if sideloading, for relative logfile naming purposes pretend that the zip is:
+                logzip="/tmp/sideload.zip"
+            fi
+            if [ "$log" == "-" ]; then
+                log="$(basename "$logzip" .zip).log"
+            fi
+            log="$(dirname "$logzip")/$log"
+        fi
+        mkdir -p "$(dirname "$log")"
+    fi
     print() {
         local s="$1"
+        if [ -n "$log" ]; then
+            >>"$log" echo "$s"
+        fi
         if [ -z "$s" ]; then s=" "; fi
         >$out echo "ui_print $s"
         >$out echo "ui_print"
