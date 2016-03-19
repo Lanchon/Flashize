@@ -38,12 +38,12 @@ if [ -z "$script" ]; then
     error "Flashize ($version)"
     error "Usage: <input-script> [<output-zip> [<runtime-logfile>]]"
     error
-    error "use <runtime-logfile> to create a logfile on the device during script execution"
-    error "the value of the <runtime-logfile> parameter can be:"
-    error "  -the absolute path of the logfile to be created or appended"
-    error "  -a relative path or filename interpreted against the path of the zipfile being run"
-    error "  -the character '-' to use the pathname of the zipfile being run with a '.log' extension"
-    fatal "  -the empty string to disable logging"
+    error "Use <runtime-logfile> to create a logfile on the device during script execution."
+    error "The value of the <runtime-logfile> parameter can be:"
+    error "  -The absolute path of the logfile to be created or appended."
+    error "  -A relative path or filename interpreted against the path of the zipfile being run."
+    error "  -The character '-' to use the pathname of the zipfile being run with a '.log' extension."
+    fatal "  -The empty string to disable logging."
 fi
 
 if [ ! -f "$script" ]; then
