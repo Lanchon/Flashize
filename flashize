@@ -34,7 +34,7 @@ if [ -z "$script" ]; then
     fatal "Usage: <input-script> [<output-zip>]"
 fi
 
-if [ ! -e "$script" ]; then
+if [ ! -f "$script" ]; then
     fatal "error: script not found"
 fi
 
