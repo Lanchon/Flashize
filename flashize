@@ -1,0 +1,114 @@
+#!/bin/bash
+
+#####################################################
+# Flashize                                          #
+# Copyright 2016, Lanchon                           #
+#####################################################
+
+#####################################################
+# Flashize is free software licensed under GNU's    #
+# General Public License (GPL) version 3 and any    #
+# later version.                                    #
+# ------------------------------------------------- #
+# The Flashize Runtime is free software licensed    #
+# under GNU's Lesser General Public License (LGPL)  #
+# version 3 and any later version.                  #
+#####################################################
+
+version="2016-02-12"
+
+set -e
+
+script="$1"
+zip="$2"
+
+td="/tmp/lanchon-flashize"
+
+fatal() {
+    >&2 echo "$@"
+    exit 1
+}
+
+if [ -z "$script" ]; then
+    >&2 echo "Flashize ($version)"
+    fatal "Usage: <input-script> [<output-zip>]"
+fi
+
+if [ ! -e "$script" ]; then
+    fatal "error: script not found"
+fi
+
+if [ -z "$zip" ]; then
+    zip="${script}.zip"
+fi
+
+wd="$td/META-INF/com/google/android"
+wdr="META-INF"
+ubin="$wd/update-binary"
+uscr="$wd/updater-script"
+
+rm -rf "$td"
+mkdir -p "$wd"
+
+cat >"$ubin" <<EOF
+#!/sbin/sh
+
+#####################################################
+# Flashize Runtime (${version})                     #
+# Copyright 2016, Lanchon                           #
+#####################################################
+
+#####################################################
+# The Flashize Runtime is free software licensed    #
+# under GNU's Lesser General Public License (LGPL)  #
+# version 3 and any later version.                  #
+# ------------------------------------------------- #
+# Note: The code appended to the Flashize Runtime,  #
+# if any, is independently licensed.                #
+#####################################################
+
+EOF
+cat >>"$ubin" <<"EOF"
+if [ "$1" != "lanchon-magic" ]; then
+    out="/proc/self/fd/$2"
+    zip="$3"
+    print() {
+        local s="$1"
+        if [ -z "$s" ]; then s=" "; fi
+        >$out echo "ui_print $s"
+        >$out echo "ui_print"
+    }
+    print
+    set -o pipefail
+    /sbin/sh "$0" "lanchon-magic" "$zip" 2>&1 | (
+        IFS=""
+        while read -r line; do print "$line"; done
+    )
+    code="$?"
+    print
+    if [ "$code" -eq "0" ]; then
+        print "[OK]";
+    else
+        print "[ERROR $code]";
+    fi
+    print
+    exit "$code"
+fi
+shift
+
+#####################################################
+
+EOF
+
+cat >"$uscr" <<EOF
+#####################################################
+# Powered by Lanchon's Flashize                     #
+#####################################################
+EOF
+
+cat "$script" >>"$ubin"
+
+zip="$(readlink -f "$zip")"
+cd "$td"
+zip -rq "$zip" "$wdr"
+rm -rf "$td"
