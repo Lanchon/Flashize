@@ -22,7 +22,7 @@ Reads script from standard input if `<input-script>` is a dash (-).
 Names zip based on `<input-script>` if `<output-zip>` is null or a dash (-).
 
 Can create a logfile on the device during script execution according to `<runtime-logfile>`.
-The value of this parameter can be:
+<br>The value of this parameter can be:
 - The absolute path of the logfile to be created or appended.
 - A relative path or filename to be interpreted against the path of the zipfile being run.
 - A dot (.) to use the pathname of the zipfile being run with a '.log' extension.
