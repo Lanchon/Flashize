@@ -17,6 +17,8 @@
 
 `flashize <input-script> [<output-zip> [<runtime-logfile>]]`
 
+Reads script from standard input if `<input-script>` is a dash (-).
+
 Use `<runtime-logfile>` to create a logfile on the device during script execution.
 The value of this parameter can be:
 - The absolute path of the logfile to be created or appended.
