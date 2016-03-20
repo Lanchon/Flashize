@@ -53,7 +53,7 @@ if [ ! -f "$script" ]; then
 fi
 
 if [ -z "$zip" ]; then
-    zip="${script}.zip"
+    zip="$(dirname "$script")/$(basename "$script" .sh).zip"
 fi
 
 wd="$td/META-INF/com/google/android"
