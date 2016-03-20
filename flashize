@@ -36,11 +36,16 @@ fatal() {
     exit 1
 }
 
+if [ "$zip" == "-" ]; then zip=""; fi
+
 if  [ -z "$script" ] || ([ "$script" == "-" ] && [ -z "$zip" ]) || [ -n "$end" ]; then
     error "Flashize ($version)"
+    error
     error "Usage: <input-script> [<output-zip> [<runtime-logfile>]]"
     error
     error "Reads script from standard input if <input-script> is a dash (-)."
+    error
+    error "Names zip based on <input-script> if <output-zip> is null or a dash (-)."
     error
     error "Use <runtime-logfile> to create a logfile on the device during script execution."
     error "The value of this parameter can be:"
