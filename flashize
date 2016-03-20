@@ -23,6 +23,8 @@ script="$1"
 zip="$2"
 log="$3"
 
+end="$4"
+
 td="/tmp/lanchon-flashize"
 
 error() {
@@ -34,7 +36,7 @@ fatal() {
     exit 1
 }
 
-if [ -z "$script" ]; then
+if [ -z "$script" ] || [ -n "$end" ]; then
     error "Flashize ($version)"
     error "Usage: <input-script> [<output-zip> [<runtime-logfile>]]"
     error
