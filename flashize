@@ -48,7 +48,7 @@ if  [ -z "$script" ] || ([ "$script" == "-" ] && [ -z "$zip" ]) || [ -n "$end" ]
     error
     error "Names zip based on <input-script> if <output-zip> is null or a dash (-)."
     error
-    error "Use <runtime-logfile> to create a logfile on the device during script execution."
+    error "Can create a logfile on the device during script execution according to <runtime-logfile>."
     error "The value of this parameter can be:"
     error "  -The absolute path of the logfile to be created or appended."
     error "  -A relative path or filename to be interpreted against the path of the zipfile being run."
