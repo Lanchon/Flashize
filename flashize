@@ -50,7 +50,7 @@ if  [ -z "$script" ] || ([ "$script" == "-" ] && [ -z "$zip" ]) || [ $# -gt $cou
     error
     error "Can create a logfile on the device during script execution according to <runtime-logfile>."
     error "The value of this parameter can be:"
-    error "  -The absolute path of the logfile to be created or appended."
+    error "  -The absolute path of the logfile to be created."
     error "  -A relative path or filename to be interpreted against the path of the zipfile being run."
     error "  -A dot (.) to use the pathname of the zipfile being run with a '.log' extension."
     fatal "  -Null or a dash (-) to disable logging."
@@ -122,6 +122,9 @@ cat >>"$ubin" <<"EOF"
         >$out echo "ui_print"
     }
     print
+    if [ -n "$log" ]; then
+        >"$log"
+    fi
     set -o pipefail
     /sbin/sh "$0" "lanchon-magic" "$zip" 2>&1 | (
         IFS=""
@@ -134,6 +137,7 @@ cat >>"$ubin" <<"EOF"
     else
         print "[ERROR $code]";
     fi
+    log=""
     print
     exit "$code"
 fi
