@@ -1,0 +1,67 @@
+#!/bin/bash
+
+set -e
+#set -o pipefail
+
+printLine() {
+
+    line="$1"
+    
+    if [ "${line::7}" == "Usage: " ]; then
+        echo "\`$tool ${line:7}\`"
+    else
+        line="$(echo "$line" | sed 's/[\<]/\`\</g')"
+        line="$(echo "$line" | sed 's/[\>]/\>\`/g')"
+        line="$(echo "$line" | sed 's/^  -/- /g')"
+        line="$(echo "$line" | sed 's/^   /  /g')"
+        echo "$line"
+    fi
+
+}
+
+printUsage() {
+
+    tool="$1"
+
+    #echo "---------------------------------------------------------------------------------------------------"
+    echo "<br>"
+    echo
+    echo "#### Usage: ${tool^^}"
+    echo
+
+    ./$tool 2>&1 | (
+        IFS=""
+        while read -r line; do
+            printLine "$line";
+        done
+    )
+
+}
+
+{
+
+cat <<"EOF"
+## Flashize
+### Turn Shell Scripts Into Flashable Android Recovery Zips
+
+#### Features
+
+- Automatically convert shell scripts to flashable zips with a single command.
+- Don't mess with `ui_print` crap: standard output and error streams will work just fine.
+- Can temporarily override the unpredictable runtime environment offered by the recovery
+<br>(shell and userland tools) with a standardized environment bundled within the zipfile.
+- Can automatically extract resources from the zipfile before invoking the script.
+- Can automatically create a logfile of the output of the script.
+- Displays (and possibly logs) the script exit code and reports it back to recovery.
+- The script receives the path of the zipfile being flashed as its first parameter.
+<br>(Other parameters reserved for future use.)
+- The conversion tools require Bash shell; they are developed and tested under Linux.
+- Flashize is free software published under GPL and LGPL version 3 and later licenses.
+
+EOF
+
+printUsage flashize
+printUsage flashize-ext
+printUsage flashize-env
+
+} >README.md
