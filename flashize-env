@@ -104,6 +104,7 @@ fi
 # Copyright 2016, Lanchon                           #
 #####################################################
 
+export FLASHIZE_ENV_VERSION="$version"
 EOF
     cat <<"EOF"
 if [ -f env/launch ]; then

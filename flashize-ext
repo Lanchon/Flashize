@@ -106,6 +106,7 @@ cp -T "$inzip" "$tmpzip"
 # Copyright 2016, Lanchon                           #
 #####################################################
 
+export FLASHIZE_EXT_VERSION="$version"
 EOF
     if [ -z "$srcdir" ]; then
         cat <<EOF
