@@ -42,18 +42,20 @@ if [ "$log" == "-" ]; then log=""; fi
 if  [ -z "$script" ] || ([ "$script" == "-" ] && [ -z "$zip" ]) || [ $# -gt $count ]; then
     error "Flashize ($version)"
     error
+    error "Converts a shell script to a flashable Android recovery zip."
+    error
     error "Usage: <input-script> [<output-zip> [<runtime-logfile>]]"
     error
-    error "Reads script from standard input if <input-script> is a dash (-)."
+    error "Reads the script from standard input if <input-script> is a dash (-)."
     error
-    error "Names zip based on <input-script> if <output-zip> is null or a dash (-)."
+    error "Names the output zipfile based on <input-script> if <output-zip> is null or a dash (-)."
     error
-    error "Can create a logfile on the device during script execution according to <runtime-logfile>."
-    error "The value of this parameter can be:"
+    error "Can create a logfile on the device at runtime, according to the value of <runtime-logfile>:"
     error "  -The absolute path of the logfile to be created."
     error "  -A relative path or filename to be interpreted against the path of the zipfile being run."
     error "  -A dot (.) to use the pathname of the zipfile being run with a '.log' extension."
-    fatal "  -Null or a dash (-) to disable logging."
+    error "  -Null or a dash (-) to disable logging."
+    fatal
 fi
 
 if [ "$script" != "-" ] && [ ! -f "$script" ]; then
