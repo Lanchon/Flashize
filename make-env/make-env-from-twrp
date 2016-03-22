@@ -1,0 +1,134 @@
+#!/bin/bash
+
+set -e
+
+img="$1"
+zip="$2"
+env="$3"
+
+if [ "$zip" == "-" ]; then
+    zip="twrp-env/$(basename "$img" .img).zip"
+fi
+
+echo "********************************************************************************"
+echo "IMG: $img"
+echo "ZIP: $zip"
+echo "ENV: $env"
+echo "********************************************************************************"
+echo
+echo
+
+td=/tmp/flashize-env-make-env-from-twrp
+
+error() {
+    >&2 echo "$@"
+}
+
+fatal() {
+    error "$@"
+    exit 1
+}
+
+if [ $# -lt 2 ]; then
+    >&2 echo "Usage: <input-twrp-img> <output-env-zip> [<env-alias> [<sbin-extra>...]]"
+    exit 1
+fi
+
+rm -f "$zip"
+
+rm -rf $td
+mkdir -p $td
+
+img="$(readlink -f "$img")"
+
+cd aik
+./cleanup.sh
+./unpackimg.sh "$img"
+cd ..
+
+echo
+echo
+
+rd=aik/ramdisk
+
+mkdir -p $td/flashize/sbin
+mkdir -p $td/flashize/env/not-used
+
+cp -r $rd/sbin $td/flashize/env/sbin
+cp -r $rd/etc $td/flashize/env/not-used/etc
+cp -r $rd/license $td/extra-licenses
+
+for f in $(cat twrp-rm-sbin); do
+    rm -f $td/flashize/env/sbin/$f
+done
+
+for f in $(cat twrp-rm-etc); do
+    rm  $td/flashize/env/not-used/etc/$f
+done
+
+for extra in "${@:4}"; do
+    cp -n "$extra" $td/flashize/env/sbin/
+done
+
+echo "*** absolute symlinks:"
+for link in $td/flashize/sbin/* $td/flashize/env/sbin/*; do
+    target="$(readlink "$link")" || true
+    if [ "${target::1}" == "/" ]; then
+        msg="${link:${#td}} -> $target"
+        if [ "${target::6}" == "/sbin/" ]; then
+            target="${target:6}"
+        else
+            fatal "error: cannot fix absolute symlink: $msg"
+        fi
+        echo "$msg >>> $target"
+        rm "$link"
+        ln -s "$target" "$link"
+    fi
+done
+echo
+
+echo
+
+listFiles() {
+    title="$1"
+    pattern="${2:-$title}"
+    echo "*** $title:"
+    pushd $td/flashize/env/sbin >/dev/null
+    if ! ls -l $pattern 2>/dev/null; then
+        echo "MISSING -------------------------------> $title"
+    fi
+    popd >/dev/null
+    echo
+}
+
+listFiles busybox
+listFiles toybox
+listFiles f2fs "*f2fs*"
+listFiles exfat "*exfat*"
+listFiles ntfs "*ntfs*"
+listFiles fsck "*fs*ck*"
+listFiles mkfs "*mk*fs*"
+listFiles fstrim
+
+echo
+
+(shopt -s nullglob; chmod +rx $td/flashize/sbin/* $td/flashize/env/sbin/*)
+
+./make-zip $td "$zip"
+
+cd aik
+./cleanup.sh
+cd ..
+
+echo
+echo
+
+if [ -n "$env" ]; then
+    echo "*** env alias:"
+    alias="$(dirname "$zip")/$env.zip"
+    rm -f "$alias"
+    ln -s "$(basename "$zip")" "$alias"
+    ls -l "$alias"
+    echo
+    echo
+fi

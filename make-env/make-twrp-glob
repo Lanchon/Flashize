@@ -1,0 +1,13 @@
+#!/bin/bash
+
+{
+
+set -e
+
+rm -f twrp-env/*
+
+for img in $(find twrp-img-glob -name "*.img" | sort); do
+    ./make-env-from-twrp "$img" -
+done
+
+} 2>&1 | tee make-twrp.log

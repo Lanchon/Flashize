@@ -1,0 +1,47 @@
+#!/bin/bash
+
+set -e
+
+dir="$1"
+zip="$2"
+
+td=/tmp/flashize-env-make-zip
+tfiles=$td/files
+tflashize=$tfiles/flashize
+tlinks=$td/links
+
+if [ $# -ne 2 ]; then
+    >&2 echo "Usage: <input-dir> <output-zip>"
+    exit 1
+fi
+
+rm -f "$zip"
+
+rm -rf $td
+mkdir -p $td
+
+cp -rd "$dir" $tfiles
+cp -rd $tflashize $tlinks
+
+find $tfiles -type l -delete
+find $tlinks \! -type d \! -type l -delete
+find $tlinks -type d -empty -delete
+
+pushd $tlinks >/dev/null
+find . -depth -print0 | cpio -o --null --format=newc --quiet >$tflashize/env/symlinks.cpio
+popd >/dev/null
+
+cat >>$tflashize/env/setup-pre <<"EOF"
+# Workaround for busybox unzip being unable to extract symlinks.
+cpio -id <env/symlinks.cpio 2>/dev/null
+if [ $? -ne 0 ]; then
+    >&2 echo "flashize-env: setup-pre: unable to extract symlinks"
+    exit 1
+fi
+rm env/symlinks.cpio
+EOF
+
+zip="$(readlink -f "$zip")"
+cd "$tfiles"
+zip -r9q "$zip" .
+rm -rf "$td"
