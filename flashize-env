@@ -1,0 +1,160 @@
+#!/bin/bash
+
+#####################################################
+# Flashize-Env                                      #
+# Copyright 2016, Lanchon                           #
+#####################################################
+
+#####################################################
+# Flashize is free software licensed under GNU's    #
+# General Public License (GPL) version 3 and any    #
+# later version.                                    #
+# ------------------------------------------------- #
+# The Flashize Runtime is free software licensed    #
+# under GNU's Lesser General Public License (LGPL)  #
+# version 3 and any later version.                  #
+#####################################################
+
+version="2016-03-19"
+
+set -e
+set -o pipefail
+
+script="$1"
+env="$2"
+zip="$3"
+log="$4"
+
+count=4
+
+dir="$(dirname "$(readlink -f "$0")")"
+envdir="$dir/env"
+td="/tmp/lanchon-flashize-env"
+
+error() {
+    >&2 echo "$@"
+}
+
+fatal() {
+    error "$@"
+    exit 1
+}
+
+if [ "$env" == "-" ]; then env=""; fi
+if [ "$zip" == "-" ]; then zip=""; fi
+if [ "$log" == "-" ]; then log=""; fi
+
+if  [ -z "$script" ] || ([ "$script" == "-" ] && [ -z "$zip" ]) || [ $# -gt $count ]; then
+    error "Flashize-Env ($version)"
+    error
+    error "Converts a shell script to a flashable Android recovery zip. The resulting flashable zip"
+    error "can temporarily override the unpredictable runtime environment offered by the recovery"
+    error "(shell and userland tools) with a standardized environment bundled within the zipfile."
+    error
+    error "Usage: <input-script> <env-spec> [<output-zip> [<runtime-logfile>]]"
+    error
+    error "Reads the script from standard input if <input-script> is a dash (-)."
+    error
+    error "Can bundle a runtime environment (shell and userland tools) and temporarily override the"
+    error "environment offered by the recovery at runtime, according to the value of <env-spec>:"
+    error "  -The name (without extension) of an environment provided in Flashize's 'env' directory."
+    error "  -The path of a user-provided zipfile containing the runtime environment."
+    error "  -Null or a dash (-) to disable overriding of the environment."
+    error
+    error "Names the output zipfile based on <input-script> if <output-zip> is null or a dash (-)."
+    error
+    error "Can create a logfile on the device at runtime, according to the value of <runtime-logfile>:"
+    error "  -The absolute path of the logfile to be created."
+    error "  -A relative path or filename to be interpreted against the path of the zipfile being run."
+    error "  -A dot (.) to use the pathname of the zipfile being run with a '.log' extension."
+    error "  -Null or a dash (-) to disable logging."
+    fatal
+fi
+
+if [ "$script" != "-" ] && [ ! -f "$script" ]; then
+    fatal "error: script not found"
+fi
+
+if [ -n "$env" ]; then
+    if [ "${env::1}" != "/" ] && [ "${env::1}" != "." ] && [ "$(basename "$env")" == "$(basename "$env" .zip)" ]; then
+        env="$envdir/$env.zip"
+    fi
+    if [ ! -f "$env" ]; then
+        fatal "error: environment not found ($env)"
+    fi
+fi
+
+if [ -z "$zip" ]; then
+    zip="$(dirname "$script")/$(basename "$script" .sh).zip"
+fi
+
+tmpzip="$zip.tmp"
+
+rm -f "$zip" "$tmpzip"
+
+if [ -z "$env" ]; then
+    "$dir/flashize" "$script" "$zip" "$log"
+    exit
+fi
+
+(
+    cat <<EOF
+#####################################################
+# Flashize-Env Runtime (${version})                 #
+# Copyright 2016, Lanchon                           #
+#####################################################
+
+EOF
+    cat <<"EOF"
+if [ -f env/launch ]; then
+    source env/launch
+else
+    if [ -f env/setup-post ]; then
+        post=env/setup-post
+    else
+        post=env/script
+    fi
+    if [ -f env/setup-pre ]; then
+        source env/setup-pre
+    fi
+    if [ -f env/setup ]; then
+        source env/setup
+    else
+        #mkdir -p sbin env/sbin
+        #chmod +x sbin/* env/sbin/*
+        FLASHIZE_SHELL="$SHELL"
+        FLASHIZE_PATH="$PATH"
+        FLASHIZE_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
+        if [ -f env/shell ]; then
+            SHELL="$(cat env/shell)"
+        else
+            SHELL=sh
+        fi
+        if [ "${SHELL::1}" != "/" ]; then
+            SHELL="/tmp/flashize/env/sbin/$SHELL"
+        fi
+        PATH=/tmp/flashize/sbin:/tmp/flashize/env/sbin
+        LD_LIBRARY_PATH="$PATH"
+        export FLASHIZE_SHELL FLASHIZE_PATH FLASHIZE_LD_LIBRARY_PATH SHELL PATH LD_LIBRARY_PATH
+    fi
+    "$SHELL" $post "$@"
+fi
+
+#####################################################
+EOF
+) | "$dir/flashize-ext" - "$env" "$tmpzip" "$log" "flashize" "/tmp"
+
+wd="$td/flashize/env"
+wdscr="$wd/script"
+
+rm -rf "$td"
+mkdir -p "$wd"
+cat "$script" >"$wdscr"
+
+zip="$(readlink -f "$zip")"
+tmpzip="$(readlink -f "$tmpzip")"
+cd "$td"
+zip -r9q "$tmpzip" .
+rm -rf "$td"
+
+mv "$tmpzip" "$zip"
