@@ -65,7 +65,6 @@ if [ -z "$zip" ]; then
 fi
 
 wd="$td/META-INF/com/google/android"
-wdr="META-INF"
 ubin="$wd/update-binary"
 uscr="$wd/updater-script"
 
@@ -154,5 +153,5 @@ cat "$script" >>"$ubin"
 
 zip="$(readlink -f "$zip")"
 cd "$td"
-zip -rq "$zip" "$wdr"
+zip -r9q "$zip" .
 rm -rf "$td"
