@@ -55,18 +55,18 @@ if  [ -z "$script" ] || [ -z "$inzip" ] || ([ "$script" == "-" ] && [ -z "$zip" 
     error
     error "Reads the script from standard input if <input-script> is a dash (-)."
     error
-    error "Names the output zipfile based on <input-script> if <output-zip> is null or a dash (-)."
+    error "Names the output zipfile based on <input-script> if <output-zip> is null or a dash."
     error
     error "Can create a logfile on the device at runtime, according to the value of <runtime-logfile>:"
     error "  -The absolute path of the logfile to be created."
     error "  -A relative path or filename to be interpreted against the path of the zipfile being run."
     error "  -A dot (.) to use the pathname of the zipfile being run with a '.log' extension."
-    error "  -Null or a dash (-) to disable logging."
+    error "  -Null or a dash to disable logging."
     error
     error "Extracts files from the zip at runtime, according to the value of <src-dir>:"
-    error "  -Null or a dash (-): changes to <dest-dir> and extracts files matching <extra-src-spec> there."
-    error "  -A path within the zip: changes to <dest-dir>/<src-dir>, wipes its contents and extracts <src-dir> there;"
-    error "   also extracts files matching <extra-src-spec> to <dest-dir>."
+    error "  -Null or a dash: changes to <dest-dir> and extracts files matching <extra-src-spec> there."
+    error "  -A path within the zip: changes to <dest-dir>/<src-dir>, wipes its contents and extracts"
+    error "   <src-dir> there. Also extracts files matching <extra-src-spec> to <dest-dir>."
     fatal
 fi
 

@@ -48,13 +48,13 @@ if  [ -z "$script" ] || ([ "$script" == "-" ] && [ -z "$zip" ]) || [ $# -gt $cou
     error
     error "Reads the script from standard input if <input-script> is a dash (-)."
     error
-    error "Names the output zipfile based on <input-script> if <output-zip> is null or a dash (-)."
+    error "Names the output zipfile based on <input-script> if <output-zip> is null or a dash."
     error
     error "Can create a logfile on the device at runtime, according to the value of <runtime-logfile>:"
     error "  -The absolute path of the logfile to be created."
     error "  -A relative path or filename to be interpreted against the path of the zipfile being run."
     error "  -A dot (.) to use the pathname of the zipfile being run with a '.log' extension."
-    error "  -Null or a dash (-) to disable logging."
+    error "  -Null or a dash to disable logging."
     fatal
 fi
 
