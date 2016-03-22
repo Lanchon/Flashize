@@ -23,7 +23,7 @@ script="$1"
 zip="$2"
 log="$3"
 
-end="$4"
+count=3
 
 td="/tmp/lanchon-flashize"
 
@@ -39,7 +39,7 @@ fatal() {
 if [ "$zip" == "-" ]; then zip=""; fi
 if [ "$log" == "-" ]; then log=""; fi
 
-if  [ -z "$script" ] || ([ "$script" == "-" ] && [ -z "$zip" ]) || [ -n "$end" ]; then
+if  [ -z "$script" ] || ([ "$script" == "-" ] && [ -z "$zip" ]) || [ $# -gt $count ]; then
     error "Flashize ($version)"
     error
     error "Usage: <input-script> [<output-zip> [<runtime-logfile>]]"
