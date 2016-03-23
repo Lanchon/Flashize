@@ -32,13 +32,18 @@ find . -depth -print0 | cpio -o --null --format=newc --quiet >$tflashize/env/sym
 popd >/dev/null
 
 cat >>$tflashize/env/setup-pre <<"EOF"
-# Workaround for busybox unzip being unable to extract symlinks.
+# Workaround for busybox unzip being unable to extract symlinks:
 cpio -id <env/symlinks.cpio 2>/dev/null
 if [ $? -ne 0 ]; then
     >&2 echo "flashize-env: setup-pre: unable to extract symlinks"
     exit 1
 fi
 rm env/symlinks.cpio
+
+# Workaround for signapk removing empty folders messing with permissions:
+mkdir -p sbin env/sbin
+chmod -R +rx sbin env/sbin
+
 EOF
 
 zip="$(readlink -f "$zip")"
