@@ -31,7 +31,7 @@ pushd $tlinks >/dev/null
 find . -depth -print0 | cpio -o --null --format=newc --quiet >$tflashize/env/symlinks.cpio
 popd >/dev/null
 
-cat >>$tflashize/env/setup-pre <<"EOF"
+cat >>$tflashize/env/post-extract <<"EOF"
 # Workaround for busybox unzip being unable to extract symlinks:
 cpio -id <env/symlinks.cpio 2>/dev/null
 if [ $? -ne 0 ]; then

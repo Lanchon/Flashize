@@ -107,6 +107,9 @@ fi
 export FLASHIZE_ENV_VERSION="$version"
 EOF
     cat <<"EOF"
+if [ -f env/post-extract ]; then
+    source env/post-extract
+fi
 if [ -f env/launch ]; then
     source env/launch
 else
@@ -114,9 +117,6 @@ else
         post=env/setup-post
     else
         post=env/script
-    fi
-    if [ -f env/setup-pre ]; then
-        source env/setup-pre
     fi
     if [ -f env/setup ]; then
         source env/setup
