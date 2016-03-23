@@ -6,7 +6,7 @@ set -e
 
 rm -f twrp-env/*
 
-./make-env-from-twrp    twrp-img/arm/twrp-2.8.7.1-hammerhead.img    -   twrp2-arm       extras/parted
+./make-env-from-twrp    twrp-img/arm/twrp-2.8.7.1-hammerhead.img    -   twrp2-arm       #extras/parted
 ./make-env-from-twrp    twrp-img/arm/twrp-3.0.0-0-hammerhead.img    -   twrp3-arm
 ./make-env-from-twrp    twrp-img/arm64/twrp-2.8.7.1-clark.img       -   twrp2-arm64
 ./make-env-from-twrp    twrp-img/arm64/twrp-3.0.0-1-clark.img       -   twrp3-arm64
