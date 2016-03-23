@@ -112,7 +112,8 @@ listFiles fstrim
 
 echo
 
-(shopt -s nullglob; chmod +rx $td/flashize/sbin/* $td/flashize/env/sbin/*)
+# signapk messes with permissions so we need to set them by script
+find $td/flashize/sbin $td/flashize/env/sbin -type f -execdir chmod +r-x {} +
 
 ./make-zip $td "$zip"
 
