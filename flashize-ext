@@ -132,6 +132,7 @@ if [ \$? -ne 0 ]; then
     >&2 echo "flashize-ext: unable to extract package contents"
     exit 1
 fi
+[ ! -f /tmp/flashize-ext-debug ] || set -x
 
 #####################################################
 

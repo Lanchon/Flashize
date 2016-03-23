@@ -145,6 +145,7 @@ cat >>"$ubin" <<"EOF"
     exit "$code"
 fi
 shift
+[ ! -f /tmp/flashize-debug ] || set -x
 
 #####################################################
 
