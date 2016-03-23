@@ -121,8 +121,8 @@ else
     if [ -f env/setup ]; then
         source env/setup
     else
-        #mkdir -p sbin env/sbin
-        #chmod +x sbin/* env/sbin/*
+        mkdir -p sbin env/sbin
+        chmod -R +rx sbin env/sbin
         FLASHIZE_SHELL="$SHELL"
         FLASHIZE_PATH="$PATH"
         FLASHIZE_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
