@@ -113,30 +113,51 @@ fi
 if [ -f env/launch ]; then
     source env/launch
 else
-    if [ -f env/setup-post ]; then
-        post=env/setup-post
-    else
-        post=env/script
-    fi
+
+    base="/tmp/flashize"
+    path="$base/sbin:$base/env/sbin"
+    libpath=""
+    shell="sh"
+    shelldebugopts="-x"
+    shellopts=""
+    script="env/script"
+    scriptargs='"$@"'
+    postsetup="env/post-setup"
+
+    env=""
+    addEnv() {
+        env="${env}$1='$2' "
+    }
+    addEnvShadow() {
+        env="${env}FLASHIZE_$1=\"\$$1\" "
+        addEnv "$@"
+    }
+
     if [ -f env/setup ]; then
         source env/setup
-    else
-        FLASHIZE_SHELL="$SHELL"
-        FLASHIZE_PATH="$PATH"
-        FLASHIZE_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
-        if [ -f env/shell ]; then
-            SHELL="$(cat env/shell)"
-        else
-            SHELL=sh
-        fi
-        if [ "${SHELL::1}" != "/" ]; then
-            SHELL="/tmp/flashize/env/sbin/$SHELL"
-        fi
-        PATH=/tmp/flashize/sbin:/tmp/flashize/env/sbin
-        LD_LIBRARY_PATH="$PATH"
-        export FLASHIZE_SHELL FLASHIZE_PATH FLASHIZE_LD_LIBRARY_PATH SHELL PATH LD_LIBRARY_PATH
     fi
-    "$SHELL" $post "$@"
+
+    if [ -z "$libpath" ]; then
+        libpath="$path"
+    fi
+    if [ "${shell::1}" != "/" ]; then
+        shell="$base/env/sbin/$shell"
+    fi
+    if [ ! -f /tmp/flashize-env-debug ]; then
+        shelldebugopts=""
+    fi
+    if [ -z "$env" ]; then
+        addEnvShadow PATH "$path"
+        addEnvShadow LD_LIBRARY_PATH "$libpath"
+        addEnvShadow SHELL "$shell"
+    fi
+
+    echo $env "'$shell'" $shelldebugopts $shellopts >env/launch-shell
+    if [ -f "$postsetup" ]; then
+        eval $env "'$shell'" $shelldebugopts $shellopts "'$postsetup'" "'$base'" "'$script'" $scriptargs
+    fi
+    eval $env "'$shell'" $shelldebugopts $shellopts "'$script'" $scriptargs
+
 fi
 
 #####################################################
