@@ -19,7 +19,7 @@
 
 #### Usage: FLASHIZE
 
-Flashize (2016-03-22)
+Flashize (2016-03-23)
 
 Converts a shell script to a flashable Android recovery zip.
 
@@ -35,11 +35,14 @@ Can create a logfile on the device at runtime, according to the value of `<runti
 - A dot (.) to use the pathname of the zipfile being run with a '.log' extension.
 - Null or a dash to disable logging.
 
+Script debugging modes are enabled by creating dummy files on the target device:
+- Create '/tmp/flashize-debug' to trace the user-supplied script.
+
 <br>
 
 #### Usage: FLASHIZE-EXT
 
-Flashize-Ext (2016-03-22)
+Flashize-Ext (2016-03-23)
 
 Converts a shell script to a flashable Android recovery zip. The resulting flashable zip
 can automatically extract resources bundled within the zipfile before invoking the script.
@@ -61,11 +64,15 @@ Extracts files from the zip at runtime, according to the value of `<src-dir>`:
 - A path within the zip: changes to `<dest-dir>`/`<src-dir>`, wipes its contents and extracts
   `<src-dir>` there. Also extracts files matching `<extra-src-spec>` to `<dest-dir>`.
 
+Script debugging modes are enabled by creating dummy files on the target device:
+- Create '/tmp/flashize-ext-debug' to trace the user-supplied script.
+- Create '/tmp/flashize-debug' to trace resource extraction.
+
 <br>
 
 #### Usage: FLASHIZE-ENV
 
-Flashize-Env (2016-03-22)
+Flashize-Env (2016-03-23)
 
 Converts a shell script to a flashable Android recovery zip. The resulting flashable zip
 can temporarily override the unpredictable runtime environment offered by the recovery
@@ -88,4 +95,9 @@ Can create a logfile on the device at runtime, according to the value of `<runti
 - A relative path or filename to be interpreted against the path of the zipfile being run.
 - A dot (.) to use the pathname of the zipfile being run with a '.log' extension.
 - Null or a dash to disable logging.
+
+Script debugging modes are enabled by creating dummy files on the target device:
+- Create '/tmp/flashize-env-debug' to trace the user-supplied script.
+- Create '/tmp/flashize-ext-debug' to trace environment setup.
+- Create '/tmp/flashize-debug' to trace resource extraction.
 
