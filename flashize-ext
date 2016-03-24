@@ -67,6 +67,10 @@ if  [ -z "$script" ] || [ -z "$inzip" ] || ([ "$script" == "-" ] && [ -z "$zip" 
     error "  -Null or a dash: changes to <dest-dir> and extracts files matching <extra-src-spec> there."
     error "  -A path within the zip: changes to <dest-dir>/<src-dir>, wipes its contents and extracts"
     error "   <src-dir> there. Also extracts files matching <extra-src-spec> to <dest-dir>."
+    error
+    error "Script debugging modes are enabled by creating dummy files on the target device:"
+    error "  -Create '/tmp/flashize-ext-debug' to trace the user-supplied script."
+    error "  -Create '/tmp/flashize-debug' to trace resource extraction."
     fatal
 fi
 

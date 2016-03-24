@@ -55,6 +55,9 @@ if  [ -z "$script" ] || ([ "$script" == "-" ] && [ -z "$zip" ]) || [ $# -gt $cou
     error "  -A relative path or filename to be interpreted against the path of the zipfile being run."
     error "  -A dot (.) to use the pathname of the zipfile being run with a '.log' extension."
     error "  -Null or a dash to disable logging."
+    error
+    error "Script debugging modes are enabled by creating dummy files on the target device:"
+    error "  -Create '/tmp/flashize-debug' to trace the user-supplied script."
     fatal
 fi
 
