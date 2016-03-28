@@ -6,6 +6,8 @@ img="$1"
 zip="$2"
 env="$3"
 
+version="$("../flashize" "--version")"
+
 if [ "$zip" == "-" ]; then
     zip="twrp-env/$(basename "$img" .img).zip"
 fi
@@ -121,6 +123,23 @@ echo
 # signapk messes with permissions so we need to set them by script
 find $base/env/sbin $base/env/sbin-extra -type f -execdir chmod +r-x {} +
 
+cat >$base/env-setup/launch <<EOF
+#####################################################
+# Flashize-Env Runtime (${version})                 #
+# Copyright 2016, Lanchon                           #
+#####################################################
+
+#####################################################
+# Flashize is free software licensed under GNU's    #
+# General Public License (GPL) version 3 and any    #
+# later version.                                    #
+# ------------------------------------------------- #
+# The Flashize Runtime is free software licensed    #
+# under GNU's Lesser General Public License (LGPL)  #
+# version 3 and any later version.                  #
+#####################################################
+
+EOF
 cat >>$base/env-setup/launch <<"EOF"
 base="/tmp/flashize"
 
@@ -187,6 +206,8 @@ for linker in $linkers; do
 done
 
 exit $code
+
+#####################################################
 EOF
 
 ./make-zip $td "$zip"

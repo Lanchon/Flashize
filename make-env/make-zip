@@ -5,6 +5,8 @@ set -e
 dir="$1"
 zip="$2"
 
+version="$("../flashize" "--version")"
+
 td=/tmp/flashize-env-make-zip
 tfiles=$td/files
 base=$tfiles/flashize
@@ -31,6 +33,23 @@ pushd $tlinks >/dev/null
 find . -depth -print0 | cpio -o --null --format=newc --quiet >$base/env-setup/symlinks.cpio
 popd >/dev/null
 
+cat >$base/env-setup/post-extract <<EOF
+#####################################################
+# Flashize-Env Runtime (${version})                 #
+# Copyright 2016, Lanchon                           #
+#####################################################
+
+#####################################################
+# Flashize is free software licensed under GNU's    #
+# General Public License (GPL) version 3 and any    #
+# later version.                                    #
+# ------------------------------------------------- #
+# The Flashize Runtime is free software licensed    #
+# under GNU's Lesser General Public License (LGPL)  #
+# version 3 and any later version.                  #
+#####################################################
+
+EOF
 cat >>$base/env-setup/post-extract <<"EOF"
 # Workaround for busybox unzip being unable to extract symlinks:
 cpio -id <env-setup/symlinks.cpio 2>/dev/null
@@ -44,6 +63,7 @@ rm env-setup/symlinks.cpio
 mkdir -p env/sbin env/sbin-extra
 chmod -R +rx env/sbin env/sbin-extra
 
+#####################################################
 EOF
 
 zip="$(readlink -f "$zip")"
