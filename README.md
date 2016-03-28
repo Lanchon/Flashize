@@ -15,14 +15,14 @@
 - The script receives the path of the zipfile being flashed as its first parameter.
 <br>(Other parameters reserved for future use.)
 - Supports various debugging modes for runtime script tracing.
-- The conversion tools require Bash shell; they are developed and tested under Linux.
+- Flashize requires Bash shell. It is developed and tested under Linux.
 - Flashize is free software published under GPL and LGPL version 3 and later licenses.
 
 <br>
 
 #### Usage: FLASHIZE
 
-Flashize (2016-03-23)
+Flashize (2016-03-28)
 
 Converts a shell script to a flashable Android recovery zip.
 
@@ -38,6 +38,10 @@ Can create a logfile on the device at runtime, according to the value of `<runti
 - A dot (.) to use the pathname of the zipfile being run with a '.log' extension.
 - Null or a dash to disable logging.
 
+This setting can be overridden by creating a '/tmp/flashize-log' file on the target device:
+- If the file is empty then enable logging to '/tmp/flashize.log'.
+- Otherwise override the value of `<runtime-logfile>` with the contents of the file.
+
 Script debugging modes are enabled by creating dummy files on the target device:
 - Create '/tmp/flashize-debug' to trace the user-supplied script.
 
@@ -45,7 +49,7 @@ Script debugging modes are enabled by creating dummy files on the target device:
 
 #### Usage: FLASHIZE-EXT
 
-Flashize-Ext (2016-03-23)
+Flashize-Ext (2016-03-28)
 
 Converts a shell script to a flashable Android recovery zip. The resulting flashable zip
 can automatically extract resources bundled within the zipfile before invoking the script.
@@ -62,6 +66,10 @@ Can create a logfile on the device at runtime, according to the value of `<runti
 - A dot (.) to use the pathname of the zipfile being run with a '.log' extension.
 - Null or a dash to disable logging.
 
+This setting can be overridden by creating a '/tmp/flashize-log' file on the target device:
+- If the file is empty then enable logging to '/tmp/flashize.log'.
+- Otherwise override the value of `<runtime-logfile>` with the contents of the file.
+
 Extracts files from the zip at runtime, according to the value of `<src-dir>`:
 - Null or a dash: changes to `<dest-dir>` and extracts files matching `<extra-src-spec>` there.
 - A path within the zip: changes to `<dest-dir>`/`<src-dir>`, wipes its contents and extracts
@@ -75,7 +83,7 @@ Script debugging modes are enabled by creating dummy files on the target device:
 
 #### Usage: FLASHIZE-ENV
 
-Flashize-Env (2016-03-23)
+Flashize-Env (2016-03-28)
 
 Converts a shell script to a flashable Android recovery zip. The resulting flashable zip
 can temporarily override the unpredictable runtime environment offered by the recovery
@@ -98,6 +106,10 @@ Can create a logfile on the device at runtime, according to the value of `<runti
 - A relative path or filename to be interpreted against the path of the zipfile being run.
 - A dot (.) to use the pathname of the zipfile being run with a '.log' extension.
 - Null or a dash to disable logging.
+
+This setting can be overridden by creating a '/tmp/flashize-log' file on the target device:
+- If the file is empty then enable logging to '/tmp/flashize.log'.
+- Otherwise override the value of `<runtime-logfile>` with the contents of the file.
 
 Script debugging modes are enabled by creating dummy files on the target device:
 - Create '/tmp/flashize-env-debug' to trace the user-supplied script.
