@@ -184,28 +184,18 @@ if [ -z "$env" ]; then
     addEnvShadow SHELL "$shell"
 fi
 
-linkers="linker linker64"
-for linker in $linkers; do
+for linker in "linker linker64"; do
     if [ -f "env/sbin/$linker" ] && [ ! -f "/sbin/$linker" ]; then
-    ln -sf "$base/env/sbin/$linker" /sbin/
+        ln -sf "$base/env/sbin/$linker" /sbin/
     fi
 done
 
-#echo $env "'$shell'" $shelldebugopts $shellopts >env-setup/launch-shell
+echo $env '#!/sbin/sh' >env-setup/shell
+echo $env "'$shell'" $shelldebugopts $shellopts '"$@"' >>env-setup/shell
+chmod +rx env-setup/shell
+
 [ ! -f "$postsetup" ] || eval $env "'$shell'" $shelldebugopts $shellopts "'$postsetup'" "'$base'" "'$script'" $scriptargs &&
-    eval $env "'$shell'" $shelldebugopts $shellopts "'$script'" $scriptargs
-code=$?
-
-prefix="$base/env/sbin/"
-for linker in $linkers; do
-    linker="/sbin/$linker"
-    target="$(readlink "$linker")" || true
-    if [ "${target::${#prefix}}" == "$prefix" ]; then
-        rm "$linker"
-    fi
-done
-
-exit $code
+eval $env "'$shell'" $shelldebugopts $shellopts "'$script'" $scriptargs
 
 #####################################################
 EOF
