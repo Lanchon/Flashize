@@ -190,9 +190,14 @@ for linker in "linker linker64"; do
     fi
 done
 
-echo $env '#!/sbin/sh' >env-setup/shell
-echo $env "'$shell'" $shelldebugopts $shellopts '"$@"' >>env-setup/shell
-chmod +rx env-setup/shell
+echo '#!/sbin/sh' >env-setup/launch-shell
+echo $env "'$shell'" $shelldebugopts $shellopts '"$@"' >>env-setup/launch-shell
+chmod +rx env-setup/launch-shell
+
+echo '#!/sbin/sh' >env-setup/launch-script
+echo "cd '$base' &&" >>env-setup/launch-script
+echo $env "'$shell'" $shelldebugopts $shellopts "'$script'" $scriptargs >>env-setup/launch-script
+chmod +rx env-setup/launch-script
 
 [ ! -f "$postsetup" ] || eval $env "'$shell'" $shelldebugopts $shellopts "'$postsetup'" "'$base'" "'$script'" $scriptargs &&
 eval $env "'$shell'" $shelldebugopts $shellopts "'$script'" $scriptargs
