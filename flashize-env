@@ -114,7 +114,7 @@ fi
 # Copyright 2016, Lanchon                           #
 #####################################################
 
-export FLASHIZE_ENV_VERSION="$version"
+export FLASHIZE_ENV_VERSION='$version'
 source env-setup/init
 
 #####################################################

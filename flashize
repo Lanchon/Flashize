@@ -102,9 +102,10 @@ EOF
 cat >>"$ubin" <<"EOF"
 if [ "$1" != "lanchon-magic" ]; then
 EOF
+qlog=$(printf '%q' $(echo "$log"))
 cat >>"$ubin" <<EOF
-    export FLASHIZE_VERSION="$version"
-    log="$log"
+    export FLASHIZE_VERSION='$version'
+    log=$qlog
 EOF
 cat >>"$ubin" <<"EOF"
     if [ -f /tmp/flashize-log ]; then
