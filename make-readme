@@ -58,7 +58,7 @@ cat <<"EOF"
 - The script receives the path of the zipfile being flashed as its first parameter.
 <br>(Other parameters reserved for future use.)
 - Supports various debugging modes for runtime script tracing.
-- The conversion tools require Bash shell; they are developed and tested under Linux.
+- Flashize requires Bash shell. It is developed and tested under Linux.
 - Flashize is free software published under GPL and LGPL version 3 and later licenses.
 
 EOF
