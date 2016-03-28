@@ -67,6 +67,10 @@ if  [ -z "$script" ] || [ -z "$inzip" ] || ([ "$script" == "-" ] && [ -z "$zip" 
     error "  -A dot (.) to use the pathname of the zipfile being run with a '.log' extension."
     error "  -Null or a dash to disable logging."
     error
+    error "This setting can be overridden by creating a '/tmp/flashize-log' file on the target device:"
+    error "  -If the file is empty then enable logging to '/tmp/flashize.log'."
+    error "  -Otherwise override the value of <runtime-logfile> with the contents of the file."
+    error
     error "Extracts files from the zip at runtime, according to the value of <src-dir>:"
     error "  -Null or a dash: changes to <dest-dir> and extracts files matching <extra-src-spec> there."
     error "  -A path within the zip: changes to <dest-dir>/<src-dir>, wipes its contents and extracts"
