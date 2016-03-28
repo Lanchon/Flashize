@@ -7,7 +7,7 @@ zip="$2"
 
 td=/tmp/flashize-env-make-zip
 tfiles=$td/files
-tflashize=$tfiles/flashize
+base=$tfiles/flashize
 tlinks=$td/links
 
 if [ $# -ne 2 ]; then
@@ -21,28 +21,28 @@ rm -rf $td
 mkdir -p $td
 
 cp -rd "$dir" $tfiles
-cp -rd $tflashize $tlinks
+cp -rd $base $tlinks
 
-find $tfiles -type l -delete
+find $base -type l -delete
 find $tlinks \! -type d \! -type l -delete
 find $tlinks -type d -empty -delete
 
 pushd $tlinks >/dev/null
-find . -depth -print0 | cpio -o --null --format=newc --quiet >$tflashize/env/symlinks.cpio
+find . -depth -print0 | cpio -o --null --format=newc --quiet >$base/env-setup/symlinks.cpio
 popd >/dev/null
 
-cat >>$tflashize/env/post-extract <<"EOF"
+cat >>$base/env-setup/post-extract <<"EOF"
 # Workaround for busybox unzip being unable to extract symlinks:
-cpio -id <env/symlinks.cpio 2>/dev/null
+cpio -id <env-setup/symlinks.cpio 2>/dev/null
 if [ $? -ne 0 ]; then
     >&2 echo "flashize-env: setup-pre: unable to extract symlinks"
     exit 1
 fi
-rm env/symlinks.cpio
+rm env-setup/symlinks.cpio
 
 # Workaround for signapk removing empty folders messing with permissions:
-mkdir -p sbin env/sbin
-chmod -R +rx sbin env/sbin
+mkdir -p env/sbin env/sbin-extra
+chmod -R +rx env/sbin env/sbin-extra
 
 EOF
 

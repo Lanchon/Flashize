@@ -49,39 +49,46 @@ echo
 echo
 
 rd=aik/ramdisk
+base=$td/flashize
 
-mkdir -p $td/flashize/sbin
-mkdir -p $td/flashize/env/not-used
+mkdir -p $base
 
-cp -r $rd/sbin $td/flashize/env/sbin
-cp -r $rd/etc $td/flashize/env/not-used/etc
-cp -r $rd/license $td/extra-licenses
+mkdir $base/env
+mkdir $base/env-setup
+
+#mkdir $base/env/dev
+#mkdir $base/env/proc
+#mkdir $base/env/sys
+#mkdir $base/env/tmp
+
+cp -r $rd/sbin $base/env/sbin
+mkdir $base/env/sbin-extra
+cp -r $rd/etc $base/env/etc
+cp -r $rd/license $td/license-env
 
 for f in $(cat twrp-rm-sbin); do
-    rm -f $td/flashize/env/sbin/$f
+    rm -f $base/env/sbin/$f
 done
 
 for f in $(cat twrp-rm-etc); do
-    rm  $td/flashize/env/not-used/etc/$f
+    rm  $base/env/etc/$f
 done
 
-for extra in "${@:4}"; do
-    cp -n "$extra" $td/flashize/env/sbin/
-done
+eval "${@:4}"
 
 echo "*** absolute symlinks:"
-for link in $td/flashize/sbin/* $td/flashize/env/sbin/*; do
+for link in $base/env/sbin/*; do
     target="$(readlink "$link")" || true
     if [ "${target::1}" == "/" ]; then
         msg="${link:${#td}} -> $target"
-        if [ "${target::6}" == "/sbin/" ]; then
-            target="${target:6}"
+        prefix="/sbin/"
+        if [ "${target::${#prefix}}" == "$prefix" ]; then
+            target="${target:${#prefix}}"
         else
             fatal "error: cannot fix absolute symlink: $msg"
         fi
         echo "$msg >>> $target"
-        rm "$link"
-        ln -s "$target" "$link"
+        ln -sf "$target" "$link"
     fi
 done
 echo
@@ -92,7 +99,7 @@ listFiles() {
     title="$1"
     pattern="${2:-$title}"
     echo "*** $title:"
-    pushd $td/flashize/env/sbin >/dev/null
+    pushd $base/env/sbin >/dev/null
     if ! ls -l $pattern 2>/dev/null; then
         echo "MISSING -------------------------------> $title"
     fi
@@ -112,7 +119,75 @@ listFiles fstrim
 echo
 
 # signapk messes with permissions so we need to set them by script
-find $td/flashize/sbin $td/flashize/env/sbin -type f -execdir chmod +r-x {} +
+find $base/env/sbin $base/env/sbin-extra -type f -execdir chmod +r-x {} +
+
+cat >>$base/env-setup/launch <<"EOF"
+base="/tmp/flashize"
+
+if [ -f env-setup/post-extract ]; then
+    source env-setup/post-extract
+fi
+
+path="$base/env/sbin-extra:$base/env/sbin"
+libpath=""
+shell="sh"
+shelldebugopts="-x"
+shellopts=""
+script="env-setup/script"
+scriptargs='"$@"'
+postsetup="env-setup/post-setup"
+
+env=""
+addEnv() {
+    env="${env}$1='$2' "
+}
+addEnvShadow() {
+    env="${env}FLASHIZE_$1=\"\$$1\" "
+    addEnv "$@"
+}
+
+if [ -f env-setup/setup ]; then
+    source env-setup/setup
+fi
+
+if [ -z "$libpath" ]; then
+    libpath="$path"
+fi
+if [ "${shell::1}" != "/" ]; then
+    shell="$base/env/sbin/$shell"
+fi
+if [ ! -f /tmp/flashize-env-debug ]; then
+    shelldebugopts=""
+fi
+if [ -z "$env" ]; then
+    addEnvShadow PATH "$path"
+    addEnvShadow LD_LIBRARY_PATH "$libpath"
+    addEnvShadow SHELL "$shell"
+fi
+
+linkers="linker linker64"
+for linker in $linkers; do
+    if [ -f "env/sbin/$linker" ] && [ ! -f "/sbin/$linker" ]; then
+    ln -sf "$base/env/sbin/$linker" /sbin/
+    fi
+done
+
+#echo $env "'$shell'" $shelldebugopts $shellopts >env-setup/launch-shell
+[ ! -f "$postsetup" ] || eval $env "'$shell'" $shelldebugopts $shellopts "'$postsetup'" "'$base'" "'$script'" $scriptargs &&
+    eval $env "'$shell'" $shelldebugopts $shellopts "'$script'" $scriptargs
+code=$?
+
+prefix="$base/env/sbin/"
+for linker in $linkers; do
+    linker="/sbin/$linker"
+    target="$(readlink "$linker")" || true
+    if [ "${target::${#prefix}}" == "$prefix" ]; then
+        rm "$linker"
+    fi
+done
+
+exit $code
+EOF
 
 ./make-zip $td "$zip"
 

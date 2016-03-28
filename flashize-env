@@ -115,66 +115,13 @@ fi
 #####################################################
 
 export FLASHIZE_ENV_VERSION="$version"
-EOF
-    cat <<"EOF"
-if [ -f env/post-extract ]; then
-    source env/post-extract
-fi
-if [ -f env/launch ]; then
-    source env/launch
-else
-
-    base="/tmp/flashize"
-    path="$base/sbin:$base/env/sbin"
-    libpath=""
-    shell="sh"
-    shelldebugopts="-x"
-    shellopts=""
-    script="env/script"
-    scriptargs='"$@"'
-    postsetup="env/post-setup"
-
-    env=""
-    addEnv() {
-        env="${env}$1='$2' "
-    }
-    addEnvShadow() {
-        env="${env}FLASHIZE_$1=\"\$$1\" "
-        addEnv "$@"
-    }
-
-    if [ -f env/setup ]; then
-        source env/setup
-    fi
-
-    if [ -z "$libpath" ]; then
-        libpath="$path"
-    fi
-    if [ "${shell::1}" != "/" ]; then
-        shell="$base/env/sbin/$shell"
-    fi
-    if [ ! -f /tmp/flashize-env-debug ]; then
-        shelldebugopts=""
-    fi
-    if [ -z "$env" ]; then
-        addEnvShadow PATH "$path"
-        addEnvShadow LD_LIBRARY_PATH "$libpath"
-        addEnvShadow SHELL "$shell"
-    fi
-
-    echo $env "'$shell'" $shelldebugopts $shellopts >env/launch-shell
-    if [ -f "$postsetup" ]; then
-        eval $env "'$shell'" $shelldebugopts $shellopts "'$postsetup'" "'$base'" "'$script'" $scriptargs
-    fi
-    eval $env "'$shell'" $shelldebugopts $shellopts "'$script'" $scriptargs
-
-fi
+source env-setup/launch
 
 #####################################################
 EOF
 ) | "$dir/flashize-ext" - "$env" "$tmpzip" "$log" "flashize" "/tmp"
 
-wd="$td/flashize/env"
+wd="$td/flashize/env-setup"
 wdscr="$wd/script"
 
 rm -rf "$td"
