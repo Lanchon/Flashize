@@ -132,10 +132,6 @@ cat >$base/env-setup/init <<EOF
 #####################################################
 
 #####################################################
-# Flashize is free software licensed under GNU's    #
-# General Public License (GPL) version 3 and any    #
-# later version.                                    #
-# ------------------------------------------------- #
 # The Flashize Runtime is free software licensed    #
 # under GNU's Lesser General Public License (LGPL)  #
 # version 3 and any later version.                  #
