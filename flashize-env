@@ -15,8 +15,6 @@
 # version 3 and any later version.                  #
 #####################################################
 
-version="2016-03-23"
-
 set -e
 set -o pipefail
 
@@ -28,6 +26,13 @@ log="$4"
 count=4
 
 dir="$(dirname "$(readlink -f "$0")")"
+version="$("$dir/flashize" "--version")"
+
+if  [ "$1" == "-v" ] || [ "$1" == "--version" ] && [ $# -eq 1 ]; then
+    echo "$version"
+    exit
+fi
+
 envdir="$dir/env"
 td="/tmp/lanchon-flashize-env"
 

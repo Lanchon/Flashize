@@ -25,6 +25,11 @@ log="$3"
 
 count=3
 
+if  [ "$1" == "-v" ] || [ "$1" == "--version" ] && [ $# -eq 1 ]; then
+    echo "$version"
+    exit
+fi
+
 td="/tmp/lanchon-flashize"
 
 error() {
