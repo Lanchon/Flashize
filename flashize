@@ -109,7 +109,7 @@ cat >>"$ubin" <<"EOF"
             logzip="$zip"
             if [ "$logzip" == "/tmp/update.zip" ] || [ "$logzip" == "/sideload/package.zip" ]; then
                 # if sideloading, for relative logfile naming purposes pretend that the zip is:
-                logzip="/tmp/sideload.zip"
+                logzip=/tmp/flashize.zip
             fi
             if [ "$log" == "." ]; then
                 log="$(basename "$logzip" .zip).log"
@@ -136,7 +136,7 @@ cat >>"$ubin" <<"EOF"
         IFS=""
         while read -r line; do print "$line"; done
     )
-    code="$?"
+    code=$?
     print
     if [ "$code" -eq "0" ]; then
         print "[OK]";
@@ -145,7 +145,7 @@ cat >>"$ubin" <<"EOF"
     fi
     log=""
     print
-    exit "$code"
+    exit $code
 fi
 shift
 [ ! -f /tmp/flashize-debug ] || set -x

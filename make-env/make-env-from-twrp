@@ -30,8 +30,7 @@ fatal() {
 }
 
 if [ $# -lt 2 ]; then
-    >&2 echo "Usage: <input-twrp-img> <output-env-zip> [<env-alias> [<sbin-extra>...]]"
-    exit 1
+    fatal "Usage: <input-twrp-img> <output-env-zip> [<env-alias> [extra-commands...]]"
 fi
 
 rm -f "$zip"
