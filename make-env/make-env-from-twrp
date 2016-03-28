@@ -184,7 +184,7 @@ if [ -z "$env" ]; then
     addEnvShadow SHELL "$shell"
 fi
 
-for linker in "linker linker64"; do
+for linker in linker linker64; do
     if [ -f "env/sbin/$linker" ] && [ ! -f "/sbin/$linker" ]; then
         ln -sf "$base/env/sbin/$linker" /sbin/
     fi
