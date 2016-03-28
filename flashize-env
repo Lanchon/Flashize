@@ -115,7 +115,7 @@ fi
 #####################################################
 
 export FLASHIZE_ENV_VERSION="$version"
-source env-setup/launch
+source env-setup/init
 
 #####################################################
 EOF

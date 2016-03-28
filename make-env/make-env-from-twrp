@@ -123,7 +123,7 @@ echo
 # signapk messes with permissions so we need to set them by script
 find $base/env/sbin $base/env/sbin-extra -type f -execdir chmod +r-x {} +
 
-cat >$base/env-setup/launch <<EOF
+cat >$base/env-setup/init <<EOF
 #####################################################
 # Flashize-Env Runtime (${version})                 #
 # Copyright 2016, Lanchon                           #
@@ -140,7 +140,7 @@ cat >$base/env-setup/launch <<EOF
 #####################################################
 
 EOF
-cat >>$base/env-setup/launch <<"EOF"
+cat >>$base/env-setup/init <<"EOF"
 base="/tmp/flashize"
 
 if [ -f env-setup/post-extract ]; then
