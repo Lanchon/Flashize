@@ -60,6 +60,6 @@ cat <<"EOF"
 EOF
 
 printUsage flashize
-printUsage flashize-ext
+printUsage flashize-ebb
 
 } >README.md

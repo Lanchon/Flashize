@@ -43,14 +43,16 @@ Script debugging modes are enabled by creating dummy files on the target device:
 
 <br>
 
-#### Usage: FLASHIZE-EXT
+#### Usage: FLASHIZE-EBB
 
-Flashize-Ext (2016-03-28)
+Flashize-EBB (2016-03-28)
 
 Converts a shell script to a flashable Android recovery zip. The resulting flashable zip
 can automatically extract resources bundled within the zipfile before invoking the script.
+This tool is incompatible with toybox due to shortcomings of its 'unzip' command, and
+requires BusyBox instead. Thus the toybox-based CyanogenMod 13 recovery is not supported.
 
-`flashize-ext <input-script> <input-zip> <output-zip> <runtime-logfile> <src-dir> <dest-dir> [<extra-src-spec>...]`
+`flashize-ebb <input-script> <input-zip> <output-zip> <runtime-logfile> <src-dir> <dest-dir> [<extra-src-spec>...]`
 
 Reads the script from standard input if `<input-script>` is a dash (-).
 
