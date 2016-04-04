@@ -109,9 +109,10 @@ destdir="${destdir%/}/"
 
 tmpzip="$zip.tmp"
 
-rm -f "$zip" "$tmpzip"
-
+rm -f "$tmpzip"
 cp -T "$inzip" "$tmpzip"
+
+rm -f "$zip"
 
 (
     cat <<EOF
