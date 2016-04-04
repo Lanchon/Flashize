@@ -119,7 +119,7 @@ rm -f "$zip"
 (
     cat <<EOF
 #####################################################
-# Flashize-EBB Runtime (${version})                #
+# Flashize-EBB Runtime (${version})                 #
 # Copyright 2016, Lanchon                           #
 #####################################################
 
