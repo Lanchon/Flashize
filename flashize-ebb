@@ -54,8 +54,8 @@ if  [ -z "$script" ] || [ -z "$inzip" ] || ([ "$script" == "-" ] && [ -z "$zip" 
     error
     error "Converts a shell script to a flashable Android recovery zip. The resulting flashable zip"
     error "can automatically extract resources bundled within the zipfile before invoking the script."
-    error "This tool is incompatible with toybox due to shortcomings of its 'unzip' command, and"
-    error "requires BusyBox instead. Thus the toybox-based CyanogenMod 13 recovery is not supported."
+    error "This tool is incompatible with Toybox due to shortcomings of its 'unzip' command, and"
+    error "requires Busybox instead. Thus the Toybox-based CyanogenMod 13 recovery is not supported."
     error
     error "Usage: <input-script> <input-zip> <output-zip> <runtime-logfile> <src-dir> <dest-dir> [<extra-src-spec>...]"
     error
