@@ -1,0 +1,136 @@
+#!/bin/bash
+
+#####################################################
+# Flashize-Ext                                      #
+# Copyright 2016, Lanchon                           #
+#####################################################
+
+#####################################################
+# Flashize is free software licensed under GNU's    #
+# General Public License (GPL) version 3 and any    #
+# later version.                                    #
+# ------------------------------------------------- #
+# The Flashize Runtime is free software licensed    #
+# under GNU's Lesser General Public License (LGPL)  #
+# version 3 and any later version.                  #
+#####################################################
+
+set -e
+set -o pipefail
+
+script="$1"
+inzip="$2"
+zip="$3"
+log="$4"
+destdir="$5"
+
+count=5
+
+dir="$(dirname "$(readlink -f "$0")")"
+version="$("$dir/flashize" "--version")"
+
+if  [ "$1" == "-v" ] || [ "$1" == "--version" ] && [ $# -eq 1 ]; then
+    echo "$version"
+    exit
+fi
+
+error() {
+    >&2 echo "$@"
+}
+
+fatal() {
+    error "$@"
+    exit 1
+}
+
+if [ "$inzip" == "-" ]; then inzip=""; fi
+if [ "$zip" == "-" ]; then zip=""; fi
+if [ "$log" == "-" ]; then log=""; fi
+if [ "$destdir" == "-" ]; then destdir=""; fi
+
+if  [ -z "$script" ] || ([ "$script" == "-" ] && [ -z "$zip" ]) || [ $# -gt $count ]; then
+    error "Flashize-Ext ($version)"
+    error
+    error "Converts a shell script to a flashable Android recovery zip. The resulting flashable zip"
+    error "automatically extracts the full content of the zipfile before invoking the script."
+    error "This tool is compatible with Busybox and Toybox."
+    error
+    error "Usage: <input-script> [<input-zip> [<output-zip> [<runtime-logfile> [<dest-dir>]]]]"
+    error
+    error "Reads the script from standard input if <input-script> is a dash (-)."
+    error
+    error "Names the output zipfile based on <input-script> if <output-zip> is null or a dash."
+    error
+    error "Can create a logfile on the device at runtime, according to the value of <runtime-logfile>:"
+    error "  -The absolute path of the logfile to be created."
+    error "  -A relative path or filename to be interpreted against the path of the zipfile being run."
+    error "  -A dot (.) to use the pathname of the zipfile being run with a '.log' extension."
+    error "  -Null or a dash to disable logging."
+    error
+    error "This setting can be overridden by creating a '/tmp/flashize-log' file on the target device:"
+    error "  -If the file is empty then enable logging to '/tmp/flashize.log'."
+    error "  -Otherwise override the value of <runtime-logfile> with the contents of the file."
+    error
+    error "Extracts files to <dest-dir> or to '/tmp/flashize' if <dest-dir> is null or a dash."
+    error
+    error "Script debugging modes are enabled by creating dummy files on the target device:"
+    error "  -Create '/tmp/flashize-ext-debug' to trace the user-supplied script."
+    error "  -Create '/tmp/flashize-debug' to trace file extraction."
+    fatal
+fi
+
+if [ "$script" != "-" ] && [ ! -f "$script" ]; then
+    fatal "error: script not found"
+fi
+
+if [ -n "$inzip" ] && [ ! -f "$inzip" ]; then
+    fatal "error: input zip not found"
+fi
+
+if [ -z "$destdir" ]; then
+    destdir="/tmp/flashize"
+fi
+
+if [ "${destdir::1}" != "/" ]; then
+    fatal "error: destination directory must be absolute"
+fi
+
+if [ -z "$zip" ]; then
+    zip="$(dirname "$script")/$(basename "$script" .sh).zip"
+fi
+
+destdir="${destdir%/}/"
+
+tmpzip="$zip.tmp"
+
+rm -f "$tmpzip"
+if [ -n "$inzip" ]; then
+    cp -T "$inzip" "$tmpzip"
+fi
+
+rm -f "$zip"
+
+(
+    cat <<EOF
+#####################################################
+# Flashize-Ext Runtime (${version})                 #
+# Copyright 2016, Lanchon                           #
+#####################################################
+
+export FLASHIZE_EXT_VERSION='$version'
+mkdir -p "$destdir" &&
+cd "$destdir" &&
+unzip -o "\$1" -d "$destdir" >/dev/null 2>&1
+if [ \$? -ne 0 ]; then
+    >&2 echo "flashize-ext: unable to extract package contents"
+    exit 1
+fi
+[ ! -f /tmp/flashize-ext-debug ] && set +x || set -x
+
+#####################################################
+
+EOF
+    cat "$script"
+) | "$dir/flashize" - "$tmpzip" "$log"
+
+mv "$tmpzip" "$zip"
