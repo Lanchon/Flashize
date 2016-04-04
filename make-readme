@@ -48,10 +48,6 @@ cat <<"EOF"
 
 - Automatically convert shell scripts to flashable zips with a single command.
 - Don't mess with `ui_print` crap: standard output and error streams will work just fine.
-- Can temporarily override the unpredictable runtime environment offered by the recovery
-<br>(shell and userland tools) with a standardized environment bundled within the zipfile.
-- Includes pre-built standardized environments for arm, arm64 and x86_64 architectures
-<br>based on TWRP 2.7.8 and TWRP 3.0.0 builds.
 - Can automatically extract resources from the zipfile before invoking the script.
 - Can automatically create a logfile of the output of the script.
 - Displays (and possibly logs) the script exit code and reports it back to recovery.
@@ -65,6 +61,5 @@ EOF
 
 printUsage flashize
 printUsage flashize-ext
-printUsage flashize-env
 
 } >README.md

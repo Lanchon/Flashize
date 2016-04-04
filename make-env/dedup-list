@@ -1,9 +1,0 @@
-#!/bin/bash
-
-set -e
-
-in="$1"
-
-out="$in.dedup"
-
-sort -u <"$in" >"$out"
