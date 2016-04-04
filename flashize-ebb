@@ -49,7 +49,7 @@ if [ "$log" == "-" ]; then log=""; fi
 if [ "$srcdir" == "-" ]; then srcdir=""; fi
 if [ "$destdir" == "-" ]; then destdir=""; fi
 
-if  [ -z "$script" ] || [ -z "$inzip" ] || ([ "$script" == "-" ] && [ -z "$zip" ]) || [ -z "$destdir" ]; then
+if  [ -z "$script" ] || ([ "$script" == "-" ] && [ -z "$zip" ]) || [ -z "$destdir" ]; then
     error "Flashize-EBB ($version)"
     error
     error "Converts a shell script to a flashable Android recovery zip. The resulting flashable zip"
@@ -88,7 +88,7 @@ if [ "$script" != "-" ] && [ ! -f "$script" ]; then
     fatal "error: script not found"
 fi
 
-if [ ! -f "$inzip" ]; then
+if [ -n "$inzip" ] && [ ! -f "$inzip" ]; then
     fatal "error: input zip not found"
 fi
 
@@ -110,7 +110,9 @@ destdir="${destdir%/}/"
 tmpzip="$zip.tmp"
 
 rm -f "$tmpzip"
-cp -T "$inzip" "$tmpzip"
+if [ -n "$inzip" ]; then
+    cp -T "$inzip" "$tmpzip"
+fi
 
 rm -f "$zip"
 
