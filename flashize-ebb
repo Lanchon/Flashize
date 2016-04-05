@@ -116,6 +116,8 @@ fi
 
 rm -f "$zip"
 
+# BUG: variables should be shell-quoted in the following code:
+
 (
     cat <<EOF
 #####################################################
