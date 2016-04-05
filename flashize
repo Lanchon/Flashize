@@ -18,6 +18,7 @@
 version="2016-03-28"
 
 set -e
+set -o pipefail
 
 script="$1"
 zip="$2"
@@ -85,7 +86,8 @@ uscr="$wd/updater-script"
 rm -rf "$td"
 mkdir -p "$wd"
 
-cat >"$ubin" <<EOF
+(
+    cat <<EOF
 #!/sbin/sh
 
 #####################################################
@@ -102,17 +104,11 @@ cat >"$ubin" <<EOF
 # if any, is independently licensed.                #
 #####################################################
 
-EOF
-cat >>"$ubin" <<"EOF"
-if [ "$1" != "lanchon-magic" ]; then
-EOF
-cat >>"$ubin" <<EOF
+if [ "\$1" != "lanchon-magic" ]; then
     export FLASHIZE_VERSION='$version'
 EOF
-echo -n '    log=' >>"$ubin"
-printf '%q' "$log" >>"$ubin"
-echo >>"$ubin"
-cat >>"$ubin" <<"EOF"
+    printf '    log=%q\n' "$log"
+    cat <<"EOF"
     if [ -f /tmp/flashize-log ]; then
         log="$(cat /tmp/flashize-log)"
         if [ -z "$log" ]; then
@@ -173,14 +169,14 @@ shift
 #####################################################
 
 EOF
+    cat "$script"
+) >"$ubin"
 
 cat >"$uscr" <<EOF
 #####################################################
 # Powered by Lanchon's Flashize                     #
 #####################################################
 EOF
-
-cat "$script" >>"$ubin"
 
 zip="$(readlink -f "$zip")"
 cd "$td"
