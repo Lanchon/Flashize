@@ -129,17 +129,17 @@ export FLASHIZE_EBB_VERSION='$version'
 EOF
     if [ -z "$srcdir" ]; then
         cat <<EOF
-mkdir -p "$destdir" &&
-cd "$destdir" &&
-unzip -oq "\$1" -d "$destdir"\\
+mkdir -p '$destdir' &&
+cd '$destdir' &&
+unzip -oq "\$1" -d '$destdir'\\
 EOF
     else
         targetdir="${destdir}$srcdir"
         cat <<EOF
-rm -rf "$targetdir" &&
-mkdir -p "$targetdir" &&
-cd "$targetdir" &&
-unzip -oq "\$1" -d "$destdir" "$srcdir/*"\\
+rm -rf '$targetdir' &&
+mkdir -p '$targetdir' &&
+cd '$targetdir' &&
+unzip -oq "\$1" -d '$destdir' '$srcdir/*'\\
 EOF
     fi
     for extra in "${@:$extras}"; do

@@ -120,9 +120,9 @@ rm -f "$zip"
 #####################################################
 
 export FLASHIZE_EXT_VERSION='$version'
-mkdir -p "$destdir" &&
-cd "$destdir" &&
-unzip -o "\$1" -d "$destdir" >/dev/null 2>&1
+mkdir -p '$destdir' &&
+cd '$destdir' &&
+unzip -o "\$1" -d '$destdir' >/dev/null 2>&1
 if [ \$? -ne 0 ]; then
     >&2 echo "flashize-ext: unable to extract package contents"
     exit 1
