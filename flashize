@@ -116,9 +116,10 @@ cat >>"$ubin" <<"EOF"
         log="$(cat /tmp/flashize-log)"
         if [ -z "$log" ]; then
             log=/tmp/flashize.log
-        elif [ "$log" == "-" ]; then
-            log=""
         fi
+    fi
+    if [ "$log" == "-" ]; then
+        log=""
     fi
     out="/proc/self/fd/$2"
     zip="$3"
