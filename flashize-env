@@ -1,0 +1,218 @@
+#!/bin/bash
+
+#####################################################
+# Flashize-Env                                      #
+# Copyright 2016, Lanchon                           #
+#####################################################
+
+#####################################################
+# Flashize is free software licensed under GNU's    #
+# General Public License (GPL) version 3 and any    #
+# later version.                                    #
+# ------------------------------------------------- #
+# The Flashize Runtime is free software licensed    #
+# under GNU's Lesser General Public License (LGPL)  #
+# version 3 and any later version.                  #
+#####################################################
+
+set -e
+set -o pipefail
+
+script="$1"
+env="$2"
+zip="$3"
+log="$4"
+
+count=4
+
+dir="$(dirname "$(readlink -f "$0")")"
+version="$("$dir/flashize" "--version")"
+
+if  [ "$1" == "-v" ] || [ "$1" == "--version" ] && [ $# -eq 1 ]; then
+    echo "$version"
+    exit
+fi
+
+envdir="$dir/env"
+td="/tmp/lanchon-flashize-env"
+
+error() {
+    >&2 echo "$@"
+}
+
+fatal() {
+    error "$@"
+    exit 1
+}
+
+if [ "$env" == "-" ]; then env=""; fi
+if [ "$zip" == "-" ]; then zip=""; fi
+if [ "$log" == "-" ]; then log=""; fi
+
+if  [ -z "$script" ] || ([ "$script" == "-" ] && [ -z "$zip" ]) || [ $# -gt $count ]; then
+    error "Flashize-Env ($version)"
+    error
+    error "Converts a shell script to a flashable Android recovery zip. The resulting flashable zip"
+    error "can temporarily add binaries to or otherwise alter the runtime environment offered by the"
+    error "recovery before invoking the script."
+    error
+    error "Usage: <input-script> [<env-spec> [<output-zip> [<runtime-logfile>]]]"
+    error
+    error "Reads the script from standard input if <input-script> is a dash (-)."
+    error
+    error "Can temporarily alter the runtime environment, according to the value of <env-spec>:"
+    error "  -The name (without extension) of a configuration provided in Flashize's 'env' directory."
+    error "  -The path of a user-provided zipfile containing the environment configuration."
+#   error "  -Null or a dash to disable alteration of the environment."
+    error
+    error "Names the output zipfile based on <input-script> if <output-zip> is null or a dash."
+    error
+    error "Can create a logfile on the device at runtime, according to the value of <runtime-logfile>:"
+    error "  -The absolute path of the logfile to be created."
+    error "  -A relative path or filename to be interpreted against the path of the zipfile being run."
+    error "  -A colon (:) to use the pathname of the zipfile being run with a '.log' extension."
+    error "  -Null or a dash to disable logging."
+    error
+    error "This setting can be overridden by creating a '/tmp/flashize-log' file on the target device:"
+    error "  -If the file is empty then enable logging to '/tmp/flashize.log'."
+    error "  -Otherwise override the value of <runtime-logfile> with the contents of the file."
+    error
+    error "Script debugging modes are enabled by creating dummy files on the target device:"
+    error "  -Create '/tmp/flashize-env-debug' to trace the user-supplied script."
+    error "  -Create '/tmp/flashize-ext-debug' to trace environment setup."
+    error "  -Create '/tmp/flashize-debug' to trace file extraction."
+    fatal
+fi
+
+if [ "$script" != "-" ] && [ ! -f "$script" ]; then
+    fatal "error: script not found"
+fi
+
+if [ -n "$env" ]; then
+    if [ "${env::1}" != "/" ] && [ "${env::1}" != "." ] && [ "$(basename "$env")" == "$(basename "$env" .zip)" ]; then
+        env="$envdir/$env.zip"
+    fi
+    if [ ! -f "$env" ]; then
+        fatal "error: environment not found ($env)"
+    fi
+fi
+
+if [ -z "$zip" ]; then
+    zip="$(dirname "$script")/$(basename "$script" .sh).zip"
+fi
+
+tmpzip="$zip.tmp"
+
+rm -f "$zip" "$tmpzip"
+
+#if [ -z "$env" ]; then
+#   "$dir/flashize" "$script" "$zip" "$log"
+#   exit
+#fi
+
+base="/tmp/flashize"
+
+# 'source' fails on CM13 recovery:
+# https://jira.cyanogenmod.org/browse/CYAN-7576
+# workaround: '.'
+
+(
+    cat <<EOF
+#####################################################
+# Flashize-Env Runtime (${version})                 #
+# Copyright 2016, Lanchon                           #
+#####################################################
+
+export FLASHIZE_ENV_VERSION='$version'
+EOF
+    printf 'base=%q\n' "$base"
+    cat <<"EOF"
+if [ -f env/init ]; then
+    . env/init
+    exit
+fi
+# CM 13.0 recovery does not allow switching SELinux to permissive mode.
+#sestatus=""
+#if [ -f env/selinux-set ]; then
+#   . env/selinux-set
+#else
+#   if [ -n "$(which setenforce)" ]; then
+#       sestatus="$(getenforce)"
+#       setenforce permissive
+#   fi
+#fi
+mkdir -p env
+if [ ! -f env/setup ]; then
+EOF
+    printf '    echo %q >env/setup\n'  "$(printf 'PATH=%q:"$PATH"' "$base/bin")"
+    printf '    echo %q >>env/setup\n' "$(printf 'LD_LIBRARY_PATH=%q:"$LD_LIBRARY_PATH"' "$base/bin")"
+    printf '    echo %q >>env/setup\n' "export PATH LD_LIBRARY_PATH"
+    cat <<"EOF"
+fi
+if [ -f env/pre-setup ]; then
+    . env/pre-setup
+fi
+if [ -f env/setup-bin ]; then
+    . env/setup-bin
+else
+    mkdir -p bin
+    chmod -R +rx bin
+fi
+if [ -f env/setup-busybox-symlink ]; then
+    # CM 13.0 recovery does not allow symlinking.
+    "$base/bin/busybox" --install -s bin || exit
+    #for tool in $(bin/busybox --list); do
+    #   if [ ! -e "bin/$tool" ]; then
+    #       ln -s busybox "bin/$tool"
+    #   fi
+    #done
+    #unset tool
+fi
+if [ -f env/setup ]; then
+    . env/setup
+fi
+if [ -f env/setup-busybox-alias ]; then
+    # Workaround for CM 13.0 recovery.
+    bin/busybox --list >/dev/null || exit
+    for tool in $(bin/busybox --list); do
+        if [ ! -e "bin/$tool" ]; then
+            alias "$tool"="busybox $tool"
+        fi
+    done
+    unset tool
+fi
+if [ -f env/post-setup ]; then
+    . env/post-setup
+fi
+[ ! -f /tmp/flashize-env-debug ] && set +x || set -x
+. env/script
+# CM 13.0 recovery does not allow switching SELinux to permissive mode.
+#code=$?
+#[ ! -f /tmp/flashize-ext-debug ] && set +x || set -x
+#if [ -f env/selinux-restore ]; then
+#   . env/selinux-restore
+#else
+#   if [ -n "$sestatus" ]; then
+#       setenforce "$sestatus"
+#   fi
+#fi
+#exit $code
+
+#####################################################
+EOF
+) | "$dir/flashize-ext" - "$env" "$tmpzip" "$log" "$base"
+
+wd="$td/env"
+wdscr="$wd/script"
+
+rm -rf "$td"
+mkdir -p "$wd"
+cat "$script" >"$wdscr"
+
+zip="$(readlink -f "$zip")"
+tmpzip="$(readlink -f "$tmpzip")"
+cd "$td"
+zip -r9q "$tmpzip" .
+rm -rf "$td"
+
+mv "$tmpzip" "$zip"
