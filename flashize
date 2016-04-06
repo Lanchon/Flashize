@@ -15,7 +15,7 @@
 # version 3 and any later version.                  #
 #####################################################
 
-version="2016-03-28"
+version="2016-04-06"
 
 set -e
 set -o pipefail
