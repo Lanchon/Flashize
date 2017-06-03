@@ -7,7 +7,7 @@
 - Don't mess with `ui_print` crap: standard output and error streams will work just fine.
 - Can add binaries to or otherwise alter the runtime environment offered by the recovery.
 - Flip Toybox the bird: includes ready-to-go Busybox binaries for various architectures.
-<br>(Binaries borrowed from [busybox.net] (https://www.busybox.net).)
+<br>(Binaries borrowed from [busybox.net](https://www.busybox.net).)
 - Can automatically extract resources from the zipfile before invoking the script.
 - Can automatically create a logfile of the output of the script.
 - Displays (and possibly logs) the script exit code and reports it back to recovery.
